@@ -85,3 +85,33 @@ test("register error callback async", (done) => {
     operationWillErrors.onFailure(() => done());
   });
 });
+
+test("lexical parallelisms", (done) => {
+  const city = "NYC";
+
+  let weatherData, forecastData;
+
+  const weatherOp = fetchWeather(city);
+  const forecastOp = fetchForecast(city);
+
+  weatherOp.onCompletion((weather) => {
+    forecastOp.onCompletion((forecast) => {
+      console.log("both done!", `${weather.temp} and ${forecast.fiveDay}`);
+      done();
+    });
+  });
+});
+
+test("life is full of async, nesting is inevitable, do sth about it", (done) => {
+  let weatherOp = Operation();
+
+  fetchCurrentCity().onCompletion((city) => {
+    fetchWeather(city).onCompletion((weather) => {
+      weatherOp.succeed(weather);
+      console.log(weather);
+    })
+  })
+
+  // other code needs to use weather response
+  weatherOp.onCompletion(weather => done());
+});
