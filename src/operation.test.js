@@ -106,11 +106,8 @@ test("life is full of async, nesting is inevitable, do sth about it", (done) => 
   let weatherOp = Operation();
 
   fetchCurrentCity().onCompletion((city) => {
-    fetchWeather(city).onCompletion((weather) => {
-      weatherOp.succeed(weather);
-      console.log(weather);
-    })
-  })
+    fetchWeather(city).forwardCompletion(weatherOp);
+  });
 
   // other code needs to use weather response
   weatherOp.onCompletion(weather => done());

@@ -110,5 +110,9 @@ function Operation() {
     operation.succeed(data);
   };
 
+  operation.forwardCompletion = (op) => {
+    operation.onCompletion(op.succeed, op.fail);
+  };
+
   return operation;
 };
