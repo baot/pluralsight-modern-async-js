@@ -103,9 +103,7 @@ test("lexical parallelisms", (done) => {
 });
 
 test("life is full of async, nesting is inevitable, do sth about it", (done) => {
-  let weatherOp = Operation();
-
-  fetchCurrentCity().onCompletion((city) => {
+  let weatherOp = fetchCurrentCity().onCompletion((city) => {
     fetchWeather(city).forwardCompletion(weatherOp);
   });
 

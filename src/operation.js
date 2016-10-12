@@ -85,9 +85,11 @@ function Operation() {
       operation.successReactions.push(onSuccess || noop);
       operation.errorReactions.push(onError || noop);
     }
+
+    return Operation();
   };
   operation.onFailure = function onFailure(onError) {
-    operation.onCompletion(null, onError);
+    return operation.onCompletion(null, onError);
   };
 
   operation.fail = function fail(error) {
