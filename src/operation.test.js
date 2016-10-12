@@ -19,6 +19,10 @@ function callDone(done) {
   }
 }
 
+function doLater(func) {
+  setTimeout(func, 2);
+}
+
 test("fetchCurrentCity pass the callbacks later on", (done) => {
   // initiate operation
   const operation = fetchCurrentCity();
@@ -64,4 +68,20 @@ test("noop if no error handler passed", (done) => {
   // trigger failure to make sure noop registered
   operation.onFailure(err => done());
 
+});
+
+test("register success callback async", (done) => {
+  const currentCity = fetchCurrentCity();
+
+  doLater(() => {
+    currentCity.onCompletion(() => done());
+  });
+});
+
+test("register error callback async", (done) => {
+  const operationWillErrors = fetchWeather();
+
+  doLater(() => {
+    operationWillErrors.onFailure(() => done());
+  });
 });
