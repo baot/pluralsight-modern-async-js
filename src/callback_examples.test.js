@@ -23,14 +23,14 @@ test("Verbose, hard to reuse, easy to forget, additional error handling mechanis
       return;
     }
 
-    getWeather(null, function (error, weather) {
-      /*
-       if (error) {
-       done(error);
-       return;
-       }
-       */
+    getWeather('LA', function (error, weather) {
+      if (error) {
+        done(error);
+        return;
+      }
+
       console.log("weather", weather);
+      done();
     });
 
     console.log(`Weather for ${city}:`);
@@ -44,9 +44,10 @@ test("Seams rip across program", function (done) {
 
   getWeather(_city, function (error, city) {
     if (error) {
-      done(error);
+      done();   // test passed
       return;
     }
+    done(new Error('shouldnt succeed'));  // test failed
   });
 
 });
@@ -158,11 +159,11 @@ test("Combined serial async dependencies and parallel result synchronization, wi
     console.log(`Weather for ${city}:`);
   });
 
-  /* 
+  /*
    // What I would like this to look like
    // - imagine `await` waits for an async operation to complete and then returns the result
    // - `await` does this without blocking
-   // - `await` will throw any errors from the async operation 
+   // - `await` will throw any errors from the async operation
 
    const city = await getCurrentCity();
 
@@ -171,10 +172,10 @@ test("Combined serial async dependencies and parallel result synchronization, wi
    const forecastRequest = getForecast(city);
 
    const weather = await weatherRequest;
-   console.log("weather", weather); 
+   console.log("weather", weather);
 
-   const forecast = await forecastRequest; 
-   console.log("forecast", forecast); 
+   const forecast = await forecastRequest;
+   console.log("forecast", forecast);
 
    done();
 
