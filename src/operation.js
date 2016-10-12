@@ -75,18 +75,28 @@ function Operation() {
 
   operation.onCompletion = function onCompletion(onSuccess, onError) {
     const noop = function() {};
+    const completionOp = new Operation();
+
+    function successHandler() {
+      if (onSuccess) {
+        const callbackResult = onSuccess(operation.result);
+        if (callbackResult && callbackResult.onCompletion) {
+          callbackResult.forwardCompletion(completionOp);
+        }
+      }
+    }
 
     if (operation.state === 'succeed') {
-      onSuccess(operation.result);
+      successHandler();
     }
     else if (operation.state === 'failed') {
       onError(operation.error);
     } else {
-      operation.successReactions.push(onSuccess || noop);
+      operation.successReactions.push(successHandler);
       operation.errorReactions.push(onError || noop);
     }
 
-    return Operation();
+    return completionOp;
   };
   operation.onFailure = function onFailure(onError) {
     return operation.onCompletion(null, onError);
