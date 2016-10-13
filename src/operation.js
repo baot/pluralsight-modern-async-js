@@ -87,14 +87,9 @@ function Operation() {
             completionOp.fail(e);
             return;
           }
-          if (callbackResult && callbackResult.then) {
-            callbackResult.forwardCompletion(completionOp);
-            return;
-          }
-
-          completionOp.succeed(operation.result);
+          completionOp.resolve(callbackResult);
         } else {
-          completionOp.succeed(operation.result);
+          completionOp.resolve(operation.result);
         }
       }, 0);
     }
@@ -109,13 +104,7 @@ function Operation() {
             completionOp.fail(e);
             return;
           }
-
-          if (callbackResult && callbackResult.then) {
-            callbackResult.forwardCompletion(completionOp);
-            return;
-          }
-
-          completionOp.succeed(callbackResult);
+          completionOp.resolve(callbackResult);
         } else {
           completionOp.fail(operation.error);
         }
@@ -148,31 +137,44 @@ function Operation() {
       return;
     }
     operation.complete = true;
+    internalReject(error);
+  };
+
+  operation.reject = operation.fail;
+
+  function internalReject(error) {
     operation.state = "failed";
     operation.error = error;
     operation.errorReactions.forEach(r => r(error));
-  };
+  }
 
-  operation.succeed = function succeed(result) {
+  operation.resolve = function resolve(value) {
     if (operation.complete) {
       return;
     }
     operation.complete = true;
+
+    internalResolve(value);
+  };
+
+  function internalResolve(value) {
+    // value could be a promise
+    if (value && value.then) {
+      value.then(internalResolve, internalReject);
+      return;
+    }
+    // or a result
     operation.state = "succeed";
-    operation.result = result;
-    operation.successReactions.forEach(r => r(result));
+    operation.result = value;
+    operation.successReactions.forEach(r => r(value));
   };
 
   operation.nodeCallback = (err, data) => {
     if (err) {
-      operation.fail(err);
+      operation.reject(err);
       return;
     }
-    operation.succeed(data);
-  };
-
-  operation.forwardCompletion = (op) => {
-    operation.onCompletion(op.succeed, op.fail);
+    operation.resolve(data);
   };
 
   return operation;

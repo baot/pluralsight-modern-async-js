@@ -203,8 +203,8 @@ function fetchCurrentCityIndecisive() {
   const operation = Operation();
 
   doLater(() => {
-    operation.succeed("NYC");
-    operation.succeed("SG");
+    operation.resolve("NYC");
+    operation.resolve("SG");
   });
 
   return operation;
@@ -234,7 +234,7 @@ test("protect from doubling up on failure", (done) => {
 function fetchCurrentCity2() {
   const operation = new Operation();
   console.log("getting started");
-  operation.succeed("NY");
+  operation.resolve("NY");
   return operation;
 }
 
@@ -252,4 +252,17 @@ test("always async", (done) => {
     expect(ui).toBe("NY");
     done();
   }, 1000);
+});
+
+test("what is resolve?", (done) => {
+  const fetchCurrentCity3 = new Operation();
+  fetchCurrentCity3.resolve("NYC");
+
+  const fetchClone = new Operation();
+  fetchClone.resolve(fetchCurrentCity3);
+
+  fetchClone.then((city) => {
+    expect(city).toBe("NYC");
+    done();
+  })
 });
