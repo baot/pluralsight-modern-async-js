@@ -83,6 +83,8 @@ function Operation() {
         if (callbackResult && callbackResult.then) {
           callbackResult.forwardCompletion(completionOp);
         }
+      } else {
+        completionOp.succeed(operation.result);
       }
     }
 
@@ -95,6 +97,8 @@ function Operation() {
         }
 
         completionOp.succeed(callbackResult);
+      } else {
+        completionOp.fail(operation.error);
       }
     }
 

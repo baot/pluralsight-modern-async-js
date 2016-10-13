@@ -110,7 +110,7 @@ test("life is full of async, nesting is inevitable, do sth about it", (done) => 
 
 function fetchCurrentCityThatFails() {
   const operation = Operation();
-  doLater(() => operation.fail("GPS broken"));
+  doLater(() => operation.fail(new Error("GPS broken")));
   return operation;
 }
 
@@ -138,15 +138,26 @@ test("async error recovery", (done) => {
     });
   });
 
-/*
-test("catch later", (done) => {
+test("error recovery bypassed if not needed", (done) => {
+  fetchCurrentCity()
+    .catch((err) => {
+      console.log(err);
+      return "default city";
+    })
+    .then((city) => {
+      expect(city).toBe("New York, NY");
+      done();
+    });
+});
+
+
+test("error fallthrough", (done) => {
   fetchCurrentCityThatFails()
     .then((city) => {
       console.log(city);
     })
     .catch((err) => {
-      console.log(err);
+      expect(err).toEqual(new Error("GPS broken"));
       done();
     });
 });
-*/
