@@ -80,9 +80,21 @@ function Operation() {
     function successHandler() {
       if (onSuccess) {
         const callbackResult = onSuccess(operation.result);
-        if (callbackResult && callbackResult.onCompletion) {
+        if (callbackResult && callbackResult.then) {
           callbackResult.forwardCompletion(completionOp);
         }
+      }
+    }
+
+    function errorHandler() {
+      if (onError) {
+        const callbackResult = onError(operation.error);
+        if (callbackResult && callbackResult.then) {
+          callbackResult.forwardCompletion(completionOp);
+          return;
+        }
+
+        completionOp.succeed(callbackResult);
       }
     }
 
@@ -90,17 +102,22 @@ function Operation() {
       successHandler();
     }
     else if (operation.state === 'failed') {
-      onError(operation.error);
+      errorHandler();
     } else {
       operation.successReactions.push(successHandler);
-      operation.errorReactions.push(onError || noop);
+      operation.errorReactions.push(errorHandler);
     }
 
     return completionOp;
   };
+
+  operation.then = operation.onCompletion;
+
   operation.onFailure = function onFailure(onError) {
-    return operation.onCompletion(null, onError);
+    return operation.then(null, onError);
   };
+
+  operation.catch = operation.onFailure;
 
   operation.fail = function fail(error) {
     operation.state = "failed";

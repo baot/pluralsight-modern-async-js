@@ -107,3 +107,46 @@ test("life is full of async, nesting is inevitable, do sth about it", (done) => 
     .onCompletion(city => fetchWeather(city))
     .onCompletion(weather => done());
 });
+
+function fetchCurrentCityThatFails() {
+  const operation = Operation();
+  doLater(() => operation.fail("GPS broken"));
+  return operation;
+}
+
+test("sync error recovery", (done) => {
+  fetchCurrentCityThatFails()
+    .catch((err) => {
+      console.log(err);
+      return "default city";
+    })
+    .then((city) => {
+      expect(city).toBe("default city");
+      done();
+    });
+});
+
+test("async error recovery", (done) => {
+  fetchCurrentCityThatFails()
+    .catch((err) => {
+      console.log(err);
+      return fetchCurrentCity();
+    })
+    .then((city) => {
+      expect(city).toBe("New York, NY");
+      done();
+    });
+  });
+
+/*
+test("catch later", (done) => {
+  fetchCurrentCityThatFails()
+    .then((city) => {
+      console.log(city);
+    })
+    .catch((err) => {
+      console.log(err);
+      done();
+    });
+});
+*/
