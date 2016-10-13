@@ -82,7 +82,11 @@ function Operation() {
         const callbackResult = onSuccess(operation.result);
         if (callbackResult && callbackResult.then) {
           callbackResult.forwardCompletion(completionOp);
+          return;
         }
+
+        completionOp.succeed(operation.result);
+
       } else {
         completionOp.succeed(operation.result);
       }

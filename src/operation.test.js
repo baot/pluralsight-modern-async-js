@@ -161,3 +161,15 @@ test("error fallthrough", (done) => {
       done();
     });
 });
+
+test("synchronous result transformation", (done) => {
+  fetchCurrentCity()
+    .then((city) => {
+      return city;
+    })
+    .then((city) => {
+      console.log(city);
+      expect(city).toBe("New York, NY");
+      done();
+    });
+});
