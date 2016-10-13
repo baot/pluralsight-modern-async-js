@@ -173,3 +173,60 @@ test("synchronous result transformation", (done) => {
       done();
     });
 });
+
+test("thrown error recovery", (done) => {
+  fetchCurrentCity()
+    .then((city) => {
+      throw new Error("oops");
+      return fetchWeather(city);
+    })
+    .catch(e => done());
+});
+
+test("error after error recovery", (done) => {
+  fetchCurrentCity()
+    .then((city) => {
+      throw new Error("oops");
+      return fetchWeather(city);
+    })
+    .catch((e) => {
+      expect(e.message).toBe("oops");
+      throw new Error("oops2");
+    })
+    .catch((e) => {
+      expect(e.message).toBe("oops2");
+      done();
+    });
+});
+
+function fetchCurrentCityIndecisive() {
+  const operation = Operation();
+
+  doLater(() => {
+    operation.succeed("NYC");
+    operation.succeed("SG");
+  });
+
+  return operation;
+}
+
+test("protect from doubling up on success", (done) => {
+  fetchCurrentCityIndecisive()
+    .then(result => done());
+});
+
+function fetchCurrentCityRepeatedFailures() {
+  const operation = Operation();
+
+  doLater(() => {
+    operation.fail(new Error("fail1"));
+    operation.fail(new Error("fail2"));
+  });
+
+  return operation;
+}
+
+test("protect from doubling up on failure", (done) => {
+  fetchCurrentCityRepeatedFailures()
+    .catch(e => done());
+});

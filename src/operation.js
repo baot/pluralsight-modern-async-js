@@ -79,7 +79,13 @@ function Operation() {
 
     function successHandler() {
       if (onSuccess) {
-        const callbackResult = onSuccess(operation.result);
+        let callbackResult;
+        try {
+          callbackResult = onSuccess(operation.result)
+        } catch(e) {
+          completionOp.fail(e);
+          return;
+        }
         if (callbackResult && callbackResult.then) {
           callbackResult.forwardCompletion(completionOp);
           return;
@@ -94,7 +100,14 @@ function Operation() {
 
     function errorHandler() {
       if (onError) {
-        const callbackResult = onError(operation.error);
+        let callbackResult;
+        try {
+          callbackResult = onError(operation.error);
+        } catch(e) {
+          completionOp.fail(e);
+          return;
+        }
+
         if (callbackResult && callbackResult.then) {
           callbackResult.forwardCompletion(completionOp);
           return;
@@ -128,12 +141,20 @@ function Operation() {
   operation.catch = operation.onFailure;
 
   operation.fail = function fail(error) {
+    if (operation.complete) {
+      return;
+    }
+    operation.complete = true;
     operation.state = "failed";
     operation.error = error;
     operation.errorReactions.forEach(r => r(error));
   };
 
   operation.succeed = function succeed(result) {
+    if (operation.complete) {
+      return;
+    }
+    operation.complete = true;
     operation.state = "succeed";
     operation.result = result;
     operation.successReactions.forEach(r => r(result));
