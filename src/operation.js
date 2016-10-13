@@ -78,45 +78,48 @@ function Operation() {
     const completionOp = new Operation();
 
     function successHandler() {
-      if (onSuccess) {
-        let callbackResult;
-        try {
-          callbackResult = onSuccess(operation.result)
-        } catch(e) {
-          completionOp.fail(e);
-          return;
-        }
-        if (callbackResult && callbackResult.then) {
-          callbackResult.forwardCompletion(completionOp);
-          return;
-        }
+      setTimeout(() => {
+        if (onSuccess) {
+          let callbackResult;
+          try {
+            callbackResult = onSuccess(operation.result)
+          } catch(e) {
+            completionOp.fail(e);
+            return;
+          }
+          if (callbackResult && callbackResult.then) {
+            callbackResult.forwardCompletion(completionOp);
+            return;
+          }
 
-        completionOp.succeed(operation.result);
-
-      } else {
-        completionOp.succeed(operation.result);
-      }
+          completionOp.succeed(operation.result);
+        } else {
+          completionOp.succeed(operation.result);
+        }
+      }, 0);
     }
 
     function errorHandler() {
-      if (onError) {
-        let callbackResult;
-        try {
-          callbackResult = onError(operation.error);
-        } catch(e) {
-          completionOp.fail(e);
-          return;
-        }
+      setTimeout(() => {
+        if (onError) {
+          let callbackResult;
+          try {
+            callbackResult = onError(operation.error);
+          } catch(e) {
+            completionOp.fail(e);
+            return;
+          }
 
-        if (callbackResult && callbackResult.then) {
-          callbackResult.forwardCompletion(completionOp);
-          return;
-        }
+          if (callbackResult && callbackResult.then) {
+            callbackResult.forwardCompletion(completionOp);
+            return;
+          }
 
-        completionOp.succeed(callbackResult);
-      } else {
-        completionOp.fail(operation.error);
-      }
+          completionOp.succeed(callbackResult);
+        } else {
+          completionOp.fail(operation.error);
+        }
+      }, 0);
     }
 
     if (operation.state === 'succeed') {

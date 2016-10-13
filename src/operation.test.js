@@ -230,3 +230,26 @@ test("protect from doubling up on failure", (done) => {
   fetchCurrentCityRepeatedFailures()
     .catch(e => done());
 });
+
+function fetchCurrentCity2() {
+  const operation = new Operation();
+  console.log("getting started");
+  operation.succeed("NY");
+  return operation;
+}
+
+test("always async", (done) => {
+  let ui;
+
+  fetchCurrentCity2()
+    .then((city) => {
+      ui = city;
+    });
+
+  ui = "loading";
+
+  setTimeout(() => {
+    expect(ui).toBe("NY");
+    done();
+  }, 1000);
+});
